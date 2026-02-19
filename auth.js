@@ -287,6 +287,5 @@ async function saveUserData() {
         }
     } catch (error) {
         console.error('Ошибка сохранения данных:', error);
-    }
 
 }
