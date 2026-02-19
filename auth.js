@@ -2,7 +2,7 @@
 // АВТОРИЗАЦИЯ И РЕГИСТРАЦИЯ
 // ======================
 
-const API_URL = 'https://your-username.github.io/doshirak-casino/api'; // ЗАМЕНИТЕ НА ВАШ URL
+const API_URL = 'https://doshirak-casino-production.up.railway.app/'; // ЗАМЕНИТЕ НА ВАШ URL
 let currentUser = null;
 let authToken = localStorage.getItem('authToken');
 
@@ -288,4 +288,5 @@ async function saveUserData() {
     } catch (error) {
         console.error('Ошибка сохранения данных:', error);
     }
+
 }
