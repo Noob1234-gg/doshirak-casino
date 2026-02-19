@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доширак-Лэнд | Виртуальное казино</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/color/96/000000/noodles.png">
+    <meta name="description" content="Виртуальное казино Доширак-Лэнд - играйте в слоты и угадывайте числа, зарабатывайте дошираки!">
+    <meta property="og:title" content="Доширак-Лэнд | Виртуальное казино">
+    <meta property="og:description" content="Играйте в слоты и угадывайте числа, зарабатывайте дошираки!">
+    <meta property="og:image" content="https://img.icons8.com/color/512/000000/noodles.png">
+    <meta property="og:url" content="https://doshirak-land.ru">
+    <meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+<!-- Модальное окно авторизации -->
+<div class="auth-modal" id="authModal" style="display: none;">
+    <div class="auth-modal-content">
+        <div class="auth-modal-header">
+            <h3 id="authModalTitle">Вход в аккаунт</h3>
+            <span class="close">&times;</span>
+        </div>
+        
+        <!-- Форма входа -->
+        <form id="loginForm" class="auth-form">
+            <div class="auth-field">
+                <label for="loginUsername">Имя пользователя</label>
+                <input type="text" id="loginUsername" required>
+            </div>
+            <div class="auth-field">
+                <label for="loginPassword">Пароль</label>
+                <input type="password" id="loginPassword" required>
+            </div>
+            <button type="submit" class="auth-btn">Войти</button>
+            <p class="auth-switch">
+                Нет аккаунта? <a href="#" id="showRegister">Зарегистрироваться</a>
+            </p>
+        </form>
+        
+        <!-- Форма регистрации -->
+        <form id="registerForm" class="auth-form" style="display: none;">
+            <div class="auth-field">
+                <label for="registerUsername">Имя пользователя</label>
+                <input type="text" id="registerUsername" required>
+            </div>
+            <div class="auth-field">
+                <label for="registerEmail">Email</label>
+                <input type="email" id="registerEmail" required>
+            </div>
+            <div class="auth-field">
+                <label for="registerPassword">Пароль</label>
+                <input type="password" id="registerPassword" required>
+            </div>
+            <div class="auth-field">
+                <label for="registerConfirmPassword">Подтвердите пароль</label>
+                <input type="password" id="registerConfirmPassword" required>
+            </div>
+            <button type="submit" class="auth-btn">Зарегистрироваться</button>
+            <p class="auth-switch">
+                Уже есть аккаунт? <a href="#" id="showLogin">Войти</a>
+            </p>
+        </form>
+    </div>
+</div>
+
+<!-- Заменить header на новый с кнопками авторизации -->
+<header>
+    <div class="logo">
+        <i class="fas fa-dice logo-icon"></i>
+        <h1>Доширак-Лэнд</h1>
+    </div>
+    
+    <div class="profile-section">
+        <div class="balance-container">
+            <i class="fas fa-coins balance-icon"></i>
+            <span class="balance" id="balance">100</span>
+            <span class="currency-name">дошираков</span>
+        </div>
+        
+        <!-- Кнопки авторизации -->
+        <div class="auth-buttons">
+            <button class="auth-header-btn" onclick="showAuthForm('login')">
+                <i class="fas fa-sign-in-alt"></i> Вход
+            </button>
+            <button class="auth-header-btn register" onclick="showAuthForm('register')">
+                <i class="fas fa-user-plus"></i> Регистрация
+            </button>
+        </div>
+        
+        <!-- Информация о пользователе (скрыта по умолчанию) -->
+        <div class="user-info" style="display: none;">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-details">
+                <span id="usernameDisplay">User</span>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+        
+        <button class="daily-bonus" id="dailyBonus">
+            <i class="fas fa-gift"></i>
+            Ежедневный бонус
+        </button>
+
+        <button class="dev-access-btn" id="devAccessBtn" title="Режим разработчика">
+            <i class="fas fa-code"></i>
+        </button>
+    </div>
+</header>
+    <!-- Модальное окно для режима разработчика -->
+    <div class="modal-overlay" id="devModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-code"></i> Режим разработчика</h3>
+                <button class="modal-close" id="closeDevModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="password-input">
+                    <label for="devPassword">Введите пароль:</label>
+                    <input type="password" id="devPassword" placeholder="Введите пароль доступа">
+                    <div class="password-hint">Код выдаётся только с разрешения разработчика</div>
+                </div>
+                <div class="dev-controls" style="display: none;">
+                    <div class="dev-section">
+                        <h4><i class="fas fa-coins"></i> Управление балансом</h4>
+                        <div class="dev-input-group">
+                            <input type="number" id="devBalance" placeholder="Установить баланс">
+                            <button class="dev-btn" id="setBalance">Установить</button>
+                        </div>
+                        <div class="dev-buttons">
+                            <button class="dev-btn" id="addBalance">+1000</button>
+                            <button class="dev-btn" id="resetBalance">Сбросить</button>
+                        </div>
+                    </div>
+                    
+                    <div class="dev-section">
+                        <h4><i class="fas fa-history"></i> Очистка данных</h4>
+                        <div class="dev-buttons">
+                            <button class="dev-btn" id="clearHistory">Очистить историю</button>
+                            <button class="dev-btn" id="clearAllData">Очистить всё</button>
+                        </div>
+                    </div>
+                    
+                    <div class="dev-section">
+                        <h4><i class="fas fa-gamepad"></i> Тестирование игр</h4>
+                        <div class="dev-buttons">
+                            <button class="dev-btn" id="testWinSlots">Тест победы (слоты)</button>
+                            <button class="dev-btn" id="testWinGuess">Тест победы (число)</button>
+                            <button class="dev-btn" id="testWinBlackjack">Тест победы (блэкджек)</button>
+                            <button class="dev-btn" id="testWinRoulette">Тест победы (рулетка)</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="dev-message" id="devMessage"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn" id="submitDevPassword">Войти</button>
+                <button class="modal-btn secondary" id="exitDevMode" style="display: none;">Выйти</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-dice logo-icon"></i>
+                <h1>Доширак-Лэнд</h1>
+            </div>
+            
+            <div class="profile-section">
+                <div class="balance-container">
+                    <i class="fas fa-coins balance-icon"></i>
+                    <span class="balance" id="balance">100</span>
+                    <span class="currency-name">дошираков</span>
+                </div>
+                
+                <button class="daily-bonus" id="dailyBonus">
+                    <i class="fas fa-gift"></i>
+                    Ежедневный бонус
+                </button>
+
+                <!-- Кнопка доступа к режиму разработчика -->
+                <button class="dev-access-btn" id="devAccessBtn" title="Режим разработчика">
+                    <i class="fas fa-code"></i>
+                </button>
+            </div>
+        </header>
+        
+        <div class="share-section">
+            <button class="share-btn" id="shareBtn" title="Поделиться игрой">
+                <i class="fas fa-share-alt"></i> Поделиться
+            </button>
+            <div class="share-links" id="shareLinks">
+                <a href="#" class="share-link" data-platform="vk" title="Поделиться ВКонтакте">
+                    <i class="fab fa-vk"></i>
+                </a>
+                <a href="#" class="share-link" data-platform="telegram" title="Поделиться в Telegram">
+                    <i class="fab fa-telegram"></i>
+                </a>
+                <a href="#" class="share-link" data-platform="whatsapp" title="Поделиться в WhatsApp">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+                <button class="copy-link-btn" id="copyLinkBtn" title="Скопировать ссылку">
+                    <i class="fas fa-link"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" data-tab="games">Игры</button>
+            <button class="tab" data-tab="leaderboard">Топ игроков</button>
+            <button class="tab" data-tab="profile">Мой профиль</button>
+            <button class="tab" data-tab="help">Помощь</button>
+        </div>
+        
+        <!-- Вкладка с играми -->
+        <div class="tab-content active" id="games-tab">
+            <div class="games-container">
+                <!-- Игра 1: Слоты -->
+                <div class="game-card">
+                    <div class="game-title">
+                        <i class="fas fa-sliders-h game-icon"></i>
+                        <h2>Вращающиеся Дошираки</h2>
+                    </div>
+                    
+                    <p class="game-description">Сделайте ставку и вращайте слоты. Если выпадут 3 одинаковых символа - вы выиграли 5x ставки!</p>
+                    
+                    <div class="bet-controls">
+                        <span>Ставка:</span>
+                        <div class="bet-buttons">
+                            <button class="bet-btn" data-change="-10">-10</button>
+                            <button class="bet-btn" data-change="-5">-5</button>
+                            <span class="bet-amount" id="slotBet">10</span>
+                            <button class="bet-btn" data-change="5">+5</button>
+                            <button class="bet-btn" data-change="10">+10</button>
+                        </div>
+                    </div>
+                    
+                    <div class="slots-container">
+                        <div class="slot" id="slot1">🍜</div>
+                        <div class="slot" id="slot2">🍜</div>
+                        <div class="slot" id="slot3">🍜</div>
+                    </div>
+                    
+                    <button class="play-btn" id="playSlots">Вращать слоты</button>
+                    
+                    <div class="result" id="slotResult">
+                        Сделайте ставку и вращайте слоты!
+                    </div>
+                </div>
+                
+                <!-- Игра 2: Угадай число -->
+                <div class="game-card">
+                    <div class="game-title">
+                        <i class="fas fa-question-circle game-icon"></i>
+                        <h2>Угадай Число</h2>
+                    </div>
+                    
+                    <p class="game-description">Угадайте число от 1 до 10. При правильном ответе вы получите 5x вашей ставки!</p>
+                    
+                    <div class="bet-controls">
+                        <span>Ставка:</span>
+                        <div class="bet-buttons">
+                            <button class="bet-btn" data-change="-10">-10</button>
+                            <button class="bet-btn" data-change="-5">-5</button>
+                            <span class="bet-amount" id="guessBet">10</span>
+                            <button class="bet-btn" data-change="5">+5</button>
+                            <button class="bet-btn" data-change="10">+10</button>
+                        </div>
+                    </div>
+                    
+                    <div class="guess-input">
+                        <label for="numberGuess">Ваше число (1-10):</label>
+                        <input type="number" id="numberGuess" min="1" max="10" value="5">
+                    </div>
+                    
+                    <button class="play-btn" id="playGuess">Угадать число</button>
+                    
+                    <div class="result" id="guessResult">
+                        Выберите число от 1 до 10 и сделайте ставку!
+                    </div>
+                </div>
+                
+                <!-- Игра 3: Блэкджек -->
+                <div class="game-card">
+                    <div class="game-title">
+                        <i class="fas fa-club game-icon"></i>
+                        <h2>Доширак-Блэкджек</h2>
+                    </div>
+                    
+                    <p class="game-description">Наберите ближе к 21, чем дилер, но не переборщите! Блэкджек (туз + 10) = 2.5x ставки.</p>
+                    
+                    <div class="bet-controls">
+                        <span>Ставка:</span>
+                        <div class="bet-buttons">
+                            <button class="bet-btn" data-change="-10">-10</button>
+                            <button class="bet-btn" data-change="-5">-5</button>
+                            <span class="bet-amount" id="blackjackBet">10</span>
+                            <button class="bet-btn" data-change="5">+5</button>
+                            <button class="bet-btn" data-change="10">+10</button>
+                        </div>
+                    </div>
+                    
+                    <div class="blackjack-container">
+                        <div class="dealer-section">
+                            <h3>Дилер:</h3>
+                            <div class="cards-container" id="dealerCards"></div>
+                            <div class="score" id="dealerScore">Очки: ?</div>
+                        </div>
+                        
+                        <div class="player-section">
+                            <h3>Игрок:</h3>
+                            <div class="cards-container" id="playerCards"></div>
+                            <div class="score" id="playerScore">Очки: 0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="blackjack-controls">
+                        <button class="blackjack-btn" id="blackjackHit">Взять</button>
+                        <button class="blackjack-btn" id="blackjackStand">Оставить</button>
+                        <button class="blackjack-btn" id="blackjackDouble">Удвоить</button>
+                        <button class="blackjack-btn" id="blackjackRestart">Новая игра</button>
+                    </div>
+                    
+                    <div class="result" id="blackjackResult">
+                        Сделайте ставку и начните игру!
+                    </div>
+                </div>
+                
+                <!-- Игра 4: Рулетка -->
+                <div class="game-card">
+                    <div class="game-title">
+                        <i class="fas fa-dharmachakra game-icon"></i>
+                        <h2>Рулетка</h2>
+                    </div>
+                    
+                    <p class="game-description">Ставьте на цвет, четность или конкретное число. Шансы от 2x до 36x!</p>
+                    
+                    <div class="bet-controls">
+                        <span>Ставка:</span>
+                        <div class="bet-buttons">
+                            <button class="bet-btn" data-change="-10">-10</button>
+                            <button class="bet-btn" data-change="-5">-5</button>
+                            <span class="bet-amount" id="rouletteBet">10</span>
+                            <button class="bet-btn" data-change="5">+5</button>
+                            <button class="bet-btn" data-change="10">+10</button>
+                        </div>
+                    </div>
+                    
+                    <div class="roulette-container">
+                        <div class="roulette-wheel" id="rouletteWheel">
+                            <div class="roulette-ball"></div>
+                        </div>
+                        
+                        <div class="roulette-controls">
+                            <div class="roulette-bet-type">
+                                <button class="roulette-bet-btn" data-bet="red" data-multiplier="2">Красное</button>
+                                <button class="roulette-bet-btn" data-bet="black" data-multiplier="2">Черное</button>
+                                <button class="roulette-bet-btn" data-bet="even" data-multiplier="2">Четное</button>
+                                <button class="roulette-bet-btn" data-bet="odd" data-multiplier="2">Нечетное</button>
+                            </div>
+                            
+                            <div class="roulette-number-select">
+                                <label>Выберите число (0-36):</label>
+                                <input type="number" id="rouletteNumber" min="0" max="36" value="0">
+                                <button class="roulette-bet-btn" id="betOnNumber" data-multiplier="36">Ставка на число</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="play-btn" id="playRoulette">Крутить рулетку</button>
+                    
+                    <div class="result" id="rouletteResult">
+                        Выберите тип ставки и нажмите "Крутить рулетку"!
+                    </div>
+                </div>
+                
+                <!-- Игра 5: Виртуальные гонки -->
+                <div class="game-card">
+                    <div class="game-title">
+                        <i class="fas fa-flag-checkered game-icon"></i>
+                        <h2>Гонки Дошираков</h2>
+                    </div>
+                    
+                    <p class="game-description">Сделайте ставку на лапшу-гонщика! Если ваш гонщик победит - получите 3x ставки!</p>
+                    
+                    <div class="bet-controls">
+                        <span>Ставка:</span>
+                        <div class="bet-buttons">
+                            <button class="bet-btn" data-change="-10">-10</button>
+                            <button class="bet-btn" data-change="-5">-5</button>
+                            <span class="bet-amount" id="raceBet">10</span>
+                            <button class="bet-btn" data-change="5">+5</button>
+                            <button class="bet-btn" data-change="10">+10</button>
+                        </div>
+                    </div>
+                    
+                    <div class="race-container">
+                        <div class="race-track">
+                            <div class="race-lane" id="lane1">
+                                <div class="racer" id="racer1">🍜</div>
+                                <div class="lane-number">1</div>
+                            </div>
+                            <div class="race-lane" id="lane2">
+                                <div class="racer" id="racer2">🥤</div>
+                                <div class="lane-number">2</div>
+                            </div>
+                            <div class="race-lane" id="lane3">
+                                <div class="racer" id="racer3">🍥</div>
+                                <div class="lane-number">3</div>
+                            </div>
+                            <div class="race-lane" id="lane4">
+                                <div class="racer" id="racer4">🎲</div>
+                                <div class="lane-number">4</div>
+                            </div>
+                            <div class="finish-line"></div>
+                        </div>
+                        
+                        <div class="race-bets">
+                            <h3>Выберите гонщика:</h3>
+                            <div class="racer-options">
+                                <button class="racer-btn" data-racer="1">🍜 Лапша-1</button>
+                                <button class="racer-btn" data-racer="2">🥤 Напиток</button>
+                                <button class="racer-btn" data-racer="3">🍥 Вафля</button>
+                                <button class="racer-btn" data-racer="4">🎲 Удача</button>
+                            </div>
+                            <div class="selected-racer" id="selectedRacer">
+                                Выберите гонщика для ставки
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="play-btn" id="startRace">Начать гонку</button>
+                    
+                    <div class="result" id="raceResult">
+                        Выберите гонщика и сделайте ставку!
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Вкладка с топом игроков -->
+        <div class="tab-content" id="leaderboard-tab">
+            <div class="leaderboard-content">
+                <div class="leaderboard-header">
+                    <h2><i class="fas fa-trophy"></i> Топ-10 игроков по количеству дошираков</h2>
+                    <div class="leaderboard-update" id="leaderboardUpdate">
+                        Обновлено только что
+                    </div>
+                </div>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Место</th>
+                            <th>Игрок</th>
+                            <th>Дошираки</th>
+                            <th>Уровень</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody">
+                        <!-- Таблица будет заполнена через JavaScript -->
+                    </tbody>
+                </table>
+                <p class="leaderboard-note">
+                    Чтобы попасть в топ, накапливайте дошираки и играйте регулярно! Топ обновляется каждые 5 минут.
+                </p>
+            </div>
+        </div>
+        
+        <!-- Вкладка с профилем -->
+        <div class="tab-content" id="profile-tab">
+            <div class="profile-content">
+                <h2><i class="fas fa-user-circle"></i> Мой профиль</h2>
+                
+                <div class="profile-info">
+                    <div class="profile-field">
+                        <label for="playerName">Имя игрока:</label>
+                        <input type="text" id="playerName" placeholder="Введите ваше имя">
+                    </div>
+                    
+                    <div class="profile-field">
+                        <label for="playerAvatar">Выберите аватар:</label>
+                        <select id="playerAvatar">
+                            <option value="👨‍💼">👨‍💼 Бизнесмен</option>
+                            <option value="👨‍🚀">👨‍🚀 Космонавт</option>
+                            <option value="🦸">🦸 Супергерой</option>
+                            <option value="🧙">🧙 Волшебник</option>
+                            <option value="👨‍🍳">👨‍🍳 Повар</option>
+                            <option value="🥷">🥷 Ниндзя</option>
+                            <option value="🍜">🍜 Доширак</option>
+                            <option value="👑">👑 Король</option>
+                            <option value="🤴">🤴 Принц</option>
+                            <option value="🦊">🦊 Лис</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button class="play-btn" id="saveProfile">Сохранить профиль</button>
+                
+                <h3><i class="fas fa-chart-line"></i> Статистика</h3>
+                <div class="profile-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalGames">0</div>
+                        <div class="stat-label">Всего игр</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="gamesWon">0</div>
+                        <div class="stat-label">Побед</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="gamesLost">0</div>
+                        <div class="stat-label">Поражений</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="winRate">0%</div>
+                        <div class="stat-label">Процент побед</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Вкладка с помощью -->
+        <div class="tab-content" id="help-tab">
+            <div class="help-content">
+                <h2><i class="fas fa-question-circle"></i> Как играть?</h2>
+                
+                <div class="help-sections">
+                    <div class="help-section">
+                        <h3><i class="fas fa-coins"></i> Начало игры</h3>
+                        <p>У вас есть начальный баланс 100 дошираков. Вы можете увеличить его, получая ежедневные бонусы или выигрывая в играх.</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3><i class="fas fa-sliders-h"></i> Игра "Слоты"</h3>
+                        <p>Сделайте ставку и вращайте слоты. Если выпадут 3 одинаковых символа, вы выиграете сумму в 5 раз больше вашей ставки!</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3><i class="fas fa-dice"></i> Игра "Угадай число"</h3>
+                        <p>Выберите число от 1 до 10 и сделайте ставку. Если угадаете загаданное число, получите 5x ставки!</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3><i class="fas fa-club"></i> Игра "Блэкджек"</h3>
+                        <p>Наберите ближе к 21, чем дилер, но не перебирайте! Блэкджек (туз + 10) дает 2.5x ставки, обычная победа - 2x ставки.</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3><i class="fas fa-dharmachakra"></i> Игра "Рулетка"</h3>
+                        <p>Ставьте на цвет (2x), четность (2x) или конкретное число (36x). Крутите рулетку и проверяйте удачу!</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3><i class="fas fa-flag-checkered"></i> Игра "Гонки"</h3>
+                        <p>Сделайте ставку на одного из 4 гонщиков. Если ваш гонщик победит, получите 3x ставки!</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3><i class="fas fa-gift"></i> Ежедневный бонус</h3>
+                        <p>Каждый день вы можете получить бесплатный бонус в 50 дошираков. Не пропускайте!</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3><i class="fas fa-trophy"></i> Рейтинг игроков</h3>
+                        <p>Соревнуйтесь с другими игроками и попадите в топ-10 лучших игроков!</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3><i class="fas fa-mobile-alt"></i> Совместимость</h3>
+                        <p>Игра полностью адаптирована для компьютеров, планшетов и мобильных телефонов.</p>
+                    </div>
+                </div>
+                
+                <div class="important-info">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Важная информация</h3>
+                    <p>Доширак-Лэнд — это виртуальное казино для развлечения. Все "дошираки" имеют исключительно игровую ценность.</p>
+                    <p>Играйте ответственно! Не рекомендуется для лиц младше 18 лет.</p>
+                    <p>Данные сохраняются в вашем браузере. При очистке кэша данные будут потеряны.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- История игр -->
+        <div class="history">
+            <h2><i class="fas fa-history"></i> История игр</h2>
+            <div class="history-items" id="historyItems">
+                <!-- История будет добавляться сюда -->
+            </div>
+        </div>
+        
+        <!-- Уведомления -->
+        <div class="notification" id="notification"></div>
+        
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Доширак-Лэнд</h3>
+                    <p>Виртуальное казино для развлечения</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Быстрые ссылки</h3>
+                    <div class="footer-links">
+                        <a href="#" data-tab="games">Игры</a>
+                        <a href="#" data-tab="leaderboard">Топ игроков</a>
+                        <a href="#" data-tab="help">Помощь</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Контакты</h3>
+                    <p>По вопросам и предложениям:</p>
+                    <p>support@doshirak-land.ru</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2023 Доширак-Лэнд. Все права защищены.</p>
+                <p>Играйте ответственно! 18+</p>
+            </div>
+
+
+<!-- Онлайн-секция -->
+<div class="online-section">
+    <h3><i class="fas fa-globe"></i> Онлайн-режим</h3>
+    <div class="online-controls">
+        <div class="online-status">
+            <span class="status-offline" style="color: #ff3b30; font-weight: bold;">● Офлайн</span>
+            <span class="status-online" style="color: #4cd964; font-weight: bold; display: none;">● Онлайн</span>
+        </div>
+        <button id="toggleOnline" class="play-btn" style="margin-top: 10px;">
+            Включить онлайн-режим
+        </button>
+        <div class="player-id" id="playerIdDisplay" style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; display: none;">
+            <div>Ваш ID для друзей:</div>
+            <div style="font-family: monospace; font-size: 0.9rem; margin: 5px 0;" id="playerId"></div>
+            <button onclick="copyPlayerId()" class="bet-btn" style="margin-top: 5px;">
+                <i class="fas fa-copy"></i> Копировать ID
+            </button>
+        </div>
+    </div>
+    <p style="margin-top: 10px; font-size: 0.9rem; color: #aaa;">
+        Включите онлайн-режим, чтобы соревноваться с друзьями!
+    </p>
+</div>
+
+
+        </footer>
+    </div>
+
+    <!-- Скрипты -->
+    <script src="script.js" defer></script>
+<script src="auth.js" defer></script>
+<script src="script.js" defer></script>
+</body>
+<!-- В файле index.html, в секции профиля, после блока сохранения профиля и перед статистикой: -->
+<div class="profile-field" style="grid-column: 1 / -1; margin-top: 20px;">
+    <label for="promoCode">Промокод:</label>
+    <div class="dev-input-group" style="max-width: 500px;">
+        <input type="text" id="promoCode" placeholder="Введите промокод для бонуса">
+        <button class="dev-btn" id="activatePromo" style="background: #ff9a3c;">Активировать</button>
+    </div>
+    <div class="password-hint" style="margin-top: 10px;">
+        Для получения промокода, запросите его у Разработчика.
+    </div>
+</div>
+</html>

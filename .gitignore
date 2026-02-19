@@ -1,0 +1,6 @@
+node_modules/
+users.json
+players.json
+.DS_Store
+Thumbs.db
+desktop.ini
